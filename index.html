@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2563eb">
+<meta name="description" content="Medical Report Maker demo for organizing user-entered lab information. Not a certified laboratory service.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+
+<title>Medical Report Maker — Demo</title>
+<style>
+:root{--blue:#2563eb;--blue2:#1d4ed8;--ink:#172033;--muted:#64748b;--line:#dbe3ef;--bg:#f4f7fb;--white:#fff;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;padding:22px 16px 26px}
+.wrap{max-width:960px;margin:auto}header .brand{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.9;font-weight:700}header h1{font-size:25px;margin:7px 0 4px}header p{margin:0;opacity:.92;font-size:14px}
+.notice{background:#fff8e7;border:1px solid #f4d48b;color:#6b4c0d;padding:12px 14px;border-radius:12px;margin:16px 0;font-size:13px;line-height:1.45}
+main{padding:0 14px 36px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 18px #12264a08}
+h2{font-size:18px;margin:0 0 14px}h3{font-size:15px;margin:0 0 10px}.sub{font-size:13px;color:var(--muted);margin:-7px 0 15px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:650;color:#344054}
+input,select,textarea{font:inherit;font-size:14px;width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2563eb1c}textarea{min-height:82px;resize:vertical}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue2)}.secondary{background:#eaf1ff;color:#1d4ed8}.plain{background:#eef2f7;color:#334155}.danger{background:#fee2e2;color:#991b1b}
+.upload{border:1.5px dashed #9db5dc;border-radius:12px;padding:14px;background:#f8fbff}.upload input{border:0;padding:5px 0}.preview-photo{max-width:100%;max-height:210px;object-fit:contain;border-radius:8px;margin-top:10px;display:none}
+.help{font-size:12px;color:var(--muted);line-height:1.45;margin-top:7px}
+.report{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+.report-head{border-bottom:2px solid #2563eb;padding-bottom:12px;margin-bottom:12px}.report-head .small{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#2563eb;font-weight:800}.report-head h3{font-size:19px;margin:5px 0}.pill{display:inline-block;border-radius:30px;background:#fff3cd;color:#785800;padding:4px 8px;font-size:10px;font-weight:800}
+table{border-collapse:collapse;width:100%;font-size:12px;margin-top:10px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid #e2e8f0;vertical-align:top}th{background:#f1f5f9;color:#334155}
+.report-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px}.report-meta div{padding:7px;background:#f8fafc;border-radius:7px}.report-meta b{display:block;color:#64748b;font-size:10px;text-transform:uppercase;margin-bottom:2px}
+.saved-list{display:flex;flex-direction:column;gap:9px}.saved-item{border:1px solid var(--line);border-radius:11px;padding:11px;display:flex;justify-content:space-between;gap:10px;align-items:center}.saved-item strong{font-size:13px}.saved-item small{display:block;color:var(--muted);margin-top:3px}.saved-item .mini-actions{display:flex;gap:5px;flex-wrap:wrap}.saved-item button{padding:7px 9px;font-size:11px}
+.empty{color:var(--muted);font-size:13px;padding:12px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 12px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}.card{padding:15px}header h1{font-size:23px}}
+@media(max-width:420px){.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.actions button{flex:1 1 42%}.saved-item{align-items:flex-start;flex-direction:column}}
+@media print{body{background:#fff}.no-print,header,footer,.notice{display:none!important}main{padding:0}.grid{display:block}.grid>.card:first-child,.saved-card{display:none!important}.grid>.card{border:0;box-shadow:none;padding:0}.report{border:0;padding:0}.report-head h3{font-size:22px}#previewSection{display:block!important}}
+</style>
+</head>
+<body>
+<header>
+ <div class="wrap">
+  <div class="brand">WALLET LAB TOOLS · DEMO</div>
+  <h1>Medical Report Maker</h1>
+  <p>Lab report draft builder · Manual entry + original report photo · PDF / image</p>
+ </div>
+</header>
+<main class="wrap">
+ <div class="notice"><b>Important:</b> Yeh demo tool hai, certified medical lab nahi. Enter kiye gaye results user-provided hain; app test values, diagnosis, doctor signature, ya hospital verification invent nahi karti. Isay official lab report ke taur par pesh na karein.</div>
+ <div class="grid">
+  <section class="card no-print">
+   <h2>Create a report draft</h2>
+   <p class="sub">Apni information enter karein. Sirf asal results use karein.</p>
+   <form id="reportForm">
+    <div class="fields">
+     <div class="field"><label for="patient">Patient name *</label><input id="patient" required maxlength="100" placeholder="Patient ka naam"></div>
+     <div class="field"><label for="age">Age</label><input id="age" type="number" min="0" max="120" placeholder="Umar"></div>
+     <div class="field"><label for="gender">Gender (optional)</label><select id="gender"><option value="">Select (optional)</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select></div>
+     <div class="field"><label for="testDate">Test date *</label><input id="testDate" type="date" required></div>
+     <div class="field"><label for="lab">Lab name</label><input id="lab" maxlength="120" placeholder="Lab ka naam (agar maloom ho)"></div>
+     <div class="field"><label for="testName">Test name *</label><input id="testName" required maxlength="120" placeholder="Misal: CBC"></div>
+     <div class="field"><label for="result">Test result *</label><input id="result" required maxlength="120" placeholder="Asal result aur unit"></div>
+     <div class="field"><label for="range">Reference range</label><input id="range" maxlength="120" placeholder="Original lab ki range"></div>
+     <div class="field full"><label for="notes">Doctor notes (optional)</label><textarea id="notes" maxlength="1000" placeholder="Sirf doctor ke diye hue notes ya apne sawalat"></textarea></div>
+     <div class="field full">
+      <label for="photo">Upload original report photo (optional)</label>
+      <div class="upload"><input id="photo" type="file" accept="image/*"><div class="help">Photo sirf is browser mein preview ke liye rakhi jati hai. Save karne par chhoti image record ke saath local device par save ho sakti hai.</div><img id="photoPreview" class="preview-photo" alt="Uploaded original report preview"></div>
+     </div>
+    </div>
+    <div class="actions">
+     <button class="primary" type="submit">Save report</button>
+     <button class="secondary" type="button" id="previewBtn">Preview report</button>
+     <button class="plain" type="button" id="clearBtn">Clear form</button>
+    </div>
+   </form>
+   <p class="help">Privacy: demo data aapke browser ke local storage mein save hota hai, kisi online server par nahi. Shared phone par sensitive health data save karne se parhez karein.</p>
+  </section>
+  <section class="card" id="previewSection">
+   <h2>Report preview</h2>
+   <p class="sub">PDF ya image export se pehle details check karein.</p>
+   <div class="report" id="reportPreview">
+    <div class="report-head"><div class="small">User-entered information · Not a certified lab report</div><h3>Medical Report Draft</h3><span class="pill">UNVERIFIED DRAFT</span></div>
+    <div class="report-meta" id="metaPreview"></div>
+    <table><thead><tr><th>Test</th><th>Result entered</th><th>Reference range</th></tr></thead><tbody id="testRows"><tr><td colspan="3">Abhi form fill karein, phir Preview par tap karein.</td></tr></tbody></table>
+    <div id="notesPreview" style="font-size:12px;margin-top:14px;white-space:pre-wrap"></div>
+    <div id="photoPreviewBlock"></div>
+    <p style="font-size:10px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:16px">Yeh document user-entered data ka draft hai. Is se medical diagnosis ya laboratory verification murad nahi.</p>
+   </div>
+   <div class="actions no-print">
+    <button class="primary" type="button" id="pdfBtn">Export PDF / Print</button>
+    <button class="secondary" type="button" id="imageBtn">Export PNG image</button>
+   </div>
+   <p class="help no-print">PDF ke liye print window mein “Save as PDF” select karein. PNG export ke liye browser ko page ka preview render karna hoga.</p>
+  </section>
+ </div>
+ <section class="card saved-card no-print" style="margin-top:16px">
+  <h2>Saved reports on this device</h2>
+  <p class="sub">Saved drafts yahan se dobara khol ya delete kar sakte hain.</p>
+  <div id="savedReports" class="saved-list"><div class="empty">Abhi koi report save nahi hui.</div></div>
+ </section>
+</main>
+<footer>Medical Report Maker demo · Local device storage · Not for official medical certification</footer>
+<script>
+const $ = id => document.getElementById(id);
+const DB_KEY = 'medicalReportMakerDrafts_v1';
+let uploadedPhotoData = '';
+let currentRecordId = null;
+
+function todayLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+$('testDate').value = todayLocal();
+
+$('photo').addEventListener('change', async e => {
+ const file=e.target.files?.[0]; if(!file){uploadedPhotoData='';$('photoPreview').style.display='none';return}
+ if(!file.type.startsWith('image/')){alert('Meherbani karke image file select karein.');e.target.value='';return}
+ if(file.size>2*1024*1024){alert('Demo ke liye photo 2 MB se chhoti rakhein.');e.target.value='';return}
+ const reader=new FileReader(); reader.onload=()=>{uploadedPhotoData=reader.result;$('photoPreview').src=uploadedPhotoData;$('photoPreview').style.display='block';renderPreview()}; reader.readAsDataURL(file);
+});
+
+function formData(){
+ return {
+  id:currentRecordId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+  patient:$('patient').value.trim(), age:$('age').value, gender:$('gender').value,
+  testDate:$('testDate').value, lab:$('lab').value.trim(), testName:$('testName').value.trim(),
+  result:$('result').value.trim(), range:$('range').value.trim(), notes:$('notes').value.trim(),
+  photo:uploadedPhotoData, updatedAt:new Date().toISOString()
+ };
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function prettyDate(v){if(!v)return 'Not provided';const d=new Date(v+'T00:00:00');return isNaN(d)?v:d.toLocaleDateString()}
+function renderPreview(data=formData()){
+ $('metaPreview').innerHTML = [
+  ['Patient',data.patient||'Not provided'],['Age',data.age?data.age+' years':'Not provided'],
+  ['Gender',data.gender||'Not provided'],['Test date',prettyDate(data.testDate)],
+  ['Lab name',data.lab||'Not provided'],['Record type','User-entered draft']
+ ].map(([k,v])=>`<div><b>${esc(k)}</b>${esc(v)}</div>`).join('');
+ $('testRows').innerHTML=`<tr><td>${esc(data.testName||'Not provided')}</td><td>${esc(data.result||'Not provided')}</td><td>${esc(data.range||'Not provided')}</td></tr>`;
+ $('notesPreview').innerHTML=data.notes?`<b>Notes:</b><br>${esc(data.notes)}`:'';
+ $('photoPreviewBlock').innerHTML=data.photo?`<div style="margin-top:12px"><b style="font-size:12px">Uploaded original report photo</b><br><img alt="Original uploaded report" src="${data.photo}" style="max-width:100%;max-height:260px;object-fit:contain;margin-top:6px;border:1px solid #e2e8f0;border-radius:8px"></div>`:'';
+}
+function readDB(){try{return JSON.parse(localStorage.getItem(DB_KEY)||'[]')}catch(e){return []}}
+function writeDB(items){localStorage.setItem(DB_KEY,JSON.stringify(items))}
+function renderSaved(){
+ const items=readDB().sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+ if(!items.length){$('savedReports').innerHTML='<div class="empty">Abhi koi report save nahi hui.</div>';return}
+ $('savedReports').innerHTML=items.map(r=>`<div class="saved-item"><div><strong>${esc(r.patient||'Unnamed patient')} · ${esc(r.testName||'Untitled test')}</strong><small>${esc(prettyDate(r.testDate))} · Updated ${esc(new Date(r.updatedAt).toLocaleString())}</small></div><div class="mini-actions"><button class="secondary" data-open="${esc(r.id)}">Open</button><button class="danger" data-delete="${esc(r.id)}">Delete</button></div></div>`).join('');
+}
+$('savedReports').addEventListener('click',e=>{
+ const open=e.target.closest('[data-open]')?.dataset.open;
+ const del=e.target.closest('[data-delete]')?.dataset.delete;
+ if(open){const r=readDB().find(x=>x.id===open);if(r){currentRecordId=r.id;$('patient').value=r.patient||'';$('age').value=r.age||'';$('gender').value=r.gender||'';$('testDate').value=r.testDate||'';$('lab').value=r.lab||'';$('testName').value=r.testName||'';$('result').value=r.result||'';$('range').value=r.range||'';$('notes').value=r.notes||'';uploadedPhotoData=r.photo||'';$('photoPreview').src=uploadedPhotoData;$('photoPreview').style.display=uploadedPhotoData?'block':'none';renderPreview(r);window.scrollTo({top:0,behavior:'smooth'})}}
+ if(del && confirm('Kya aap yeh saved draft delete karna chahte hain?')){writeDB(readDB().filter(x=>x.id!==del));if(currentRecordId===del)currentRecordId=null;renderSaved()}
+});
+$('reportForm').addEventListener('submit',e=>{
+ e.preventDefault();const d=formData();
+ if(!d.patient||!d.testDate||!d.testName||!d.result){alert('Patient name, test date, test name aur test result zaroori hain.');return}
+ try{const items=readDB();const i=items.findIndex(x=>x.id===d.id);if(i>=0)items[i]=d;else items.unshift(d);writeDB(items);currentRecordId=d.id;renderPreview(d);renderSaved();alert('Report draft is device par save ho gayi.')}catch(err){alert('Save nahi ho saka. Mumkin hai browser storage bhar gaya ho. Photo chhoti karein aur dobara try karein.')}
+});
+$('previewBtn').addEventListener('click',()=>{renderPreview();$('previewSection').scrollIntoView({behavior:'smooth',block:'start'})});
+$('clearBtn').addEventListener('click',()=>{if(!confirm('Form clear kar dein? Saved reports delete nahi hongi.'))return;$('reportForm').reset();$('testDate').value=todayLocal();$('photoPreview').style.display='none';uploadedPhotoData='';currentRecordId=null;renderPreview()});
+$('pdfBtn').addEventListener('click',()=>{renderPreview();window.print()});
+$('imageBtn').addEventListener('click',async()=>{
+ renderPreview();
+ // Export a clean report-only image using a self-contained SVG and rasterize it.
+ const d=formData();
+ const lines=[
+  ['MEDICAL REPORT DRAFT',24,true],['USER-ENTERED INFORMATION · NOT A CERTIFIED LAB REPORT',13,false],
+  ['Patient: '+(d.patient||'Not provided')+'    Age: '+(d.age?d.age+' years':'Not provided'),15,false],
+  ['Gender: '+(d.gender||'Not provided')+'    Test date: '+prettyDate(d.testDate),15,false],
+  ['Lab: '+(d.lab||'Not provided'),15,false],['Test: '+(d.testName||'Not provided'),17,true],
+  ['Result entered: '+(d.result||'Not provided'),17,true],['Reference range: '+(d.range||'Not provided'),15,false],
+  ['Notes: '+(d.notes||'None provided'),14,false],
+  ['This is a user-entered draft, not a verified laboratory result.',12,false]
+ ];
+ const escXml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ let y=48;let texts='';
+ for(const [txt,size,bold] of lines){texts+=`<text x="34" y="${y}" font-family="Arial,sans-serif" font-size="${size}" font-weight="${bold?'700':'400'}" fill="${size===24?'#1d4ed8':'#172033'}">${escXml(txt.slice(0,105))}</text>`;y+=size+19}
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${y+32}"><rect width="100%" height="100%" fill="white"/><rect x="18" y="18" width="864" height="${y}" rx="16" fill="white" stroke="#dbe3ef"/><rect x="18" y="18" width="864" height="8" rx="4" fill="#2563eb"/>${texts}</svg>`;
+ const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});const url=URL.createObjectURL(blob);const img=new Image();
+ img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=900;canvas.height=y+32;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);URL.revokeObjectURL(url);const a=document.createElement('a');a.download='medical-report-draft.png';a.href=canvas.toDataURL('image/png');a.click()};
+ img.onerror=()=>{URL.revokeObjectURL(url);alert('Image export is not supported in this browser. PDF/Print option try karein.')};img.src=url;
+});
+renderPreview();renderSaved();
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
